@@ -6,10 +6,10 @@ import html
 import re
 from prettytable import PrettyTable
 
-
+# Getting command line arguments
 arguments = sys.argv
 
-urldata = UrlData()
+urldata = UrlData() # Initializing URL data model
 
 
 def main():
@@ -18,6 +18,7 @@ def main():
         url = arguments[1]
         urldata.url = url
         keyword = str(input("Please provide a keyword if you'd like to search for it: "))
+        
         try:
             response = requests.get(url)
             html_object = html.unescape(response.text)
@@ -31,6 +32,7 @@ def main():
             
             print_table1()
             print_table2(urldata.extracted_links)
+
         except Exception as e:
             print("Ouch, this address doesn't respond.")
 
@@ -40,6 +42,13 @@ def main():
 
 
 def get_attributes(response):
+    """ Gets the Status Code, Elapsed timing, and Encoding from a requests.get 
+    response object and updates the urldata variable.
+    Parameters:
+    response (Response): The requests.get Response object.
+    Returns:
+    None.
+    """
     response = response 
 
     urldata.status_code = response.status_code
@@ -48,11 +57,26 @@ def get_attributes(response):
 
 
 def get_links(soup):
+    """ Extracts all links from a BeautifulSoup object and passes 
+    the list of links to the urldata variable.
+    Parameters:
+    soup (BeautifulSoup): A BeautifulSoup object to search in. 
+    Returns:
+    None.
+    """
     for link in soup.find_all('a'):
         urldata.extracted_links.append(link.get('href'))
 
 
 def find_keywords(keyword, soup):
+    """ Searches for a keyword in a BeautifulSoup object, then
+    updates urldata variable with the result and keyword counts.
+    Parameters:
+    keyword (str): A keyword one wishes to search for. 
+    soup (BeautifulSoup): A BeautifulSoup object to search in. 
+    Returns:
+    None.
+    """
     soup_str = str(soup)
     matches = re.findall(f'{keyword}', soup_str, re.IGNORECASE)
 
@@ -64,6 +88,12 @@ def find_keywords(keyword, soup):
 
 
 def print_table1():
+    """ Generates and prints a table using the attributes from the urldata variable.
+    Parameters:
+    None.
+    Returns:
+    None.
+    """
     table = PrettyTable()
     table.field_names = ['URL', 'Status Code', 'Encoding', 
                             'Elapsed Time', 'Contains Keyword', 'Keyword Count']
@@ -73,6 +103,12 @@ def print_table1():
 
 
 def print_table2(links):
+    """ Generates and prints a table using a list of links.
+    Parameters:
+    list (str): A list of strings
+    Returns:
+    None.
+    """
     table = PrettyTable()
     table.field_names = ['#', 'Link']
     for i, link in enumerate(links, start=1):
